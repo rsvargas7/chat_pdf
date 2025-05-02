@@ -10,29 +10,29 @@ from langchain.chains.question_answering import load_qa_chain
 import platform
 
 # App title and presentation
-st.title('Generación Aumentada por Recuperación (RAG) 💬')
-st.write("Versión de Python:", platform.python_version())
+st.title('Generación asistida por recuperación de información')
+st.write("Edición de Python:", platform.python_version())
 
 # Load and display image
 try:
-    image = Image.open('Chat_pdf.png')
+    image = Image.open('B.jpg')
     st.image(image, width=350)
 except Exception as e:
-    st.warning(f"No se pudo cargar la imagen: {e}")
+    st.warning(f"La imagen no se ha podido mostrar: {e}")
 
 # Sidebar information
 with st.sidebar:
-    st.subheader("Este Agente te ayudará a realizar análisis sobre el PDF cargado")
+    st.subheader("Este asistente te apoyará en el análisis del PDF que subiste")
 
 # Get API key from user
-ke = st.text_input('Ingresa tu Clave de OpenAI', type="password")
+ke = st.text_input('Introduce tu API key de OpenAI', type="password")
 if ke:
     os.environ['OPENAI_API_KEY'] = ke
 else:
-    st.warning("Por favor ingresa tu clave de API de OpenAI para continuar")
+    st.warning("Introduce tu clave API de OpenAI para seguir adelante, por favor.")
 
 # PDF uploader
-pdf = st.file_uploader("Carga el archivo PDF", type="pdf")
+pdf = st.file_uploader("Sube el archivo PDF", type="pdf")
 
 # Process the PDF if uploaded
 if pdf is not None and ke:
@@ -43,7 +43,7 @@ if pdf is not None and ke:
         for page in pdf_reader.pages:
             text += page.extract_text()
         
-        st.info(f"Texto extraído: {len(text)} caracteres")
+        st.info(f"Texto recuperado: {len(text)} caracteres")
         
         # Split text into chunks
         text_splitter = CharacterTextSplitter(
@@ -53,14 +53,14 @@ if pdf is not None and ke:
             length_function=len
         )
         chunks = text_splitter.split_text(text)
-        st.success(f"Documento dividido en {len(chunks)} fragmentos")
+        st.success(f"Documento segmentado en {len(chunks)} fragmentos")
         
         # Create embeddings and knowledge base
         embeddings = OpenAIEmbeddings()
         knowledge_base = FAISS.from_texts(chunks, embeddings)
         
         # User question interface
-        st.subheader("Escribe qué quieres saber sobre el documento")
+        st.subheader("Indica qué información te gustaría obtener del documento")
         user_question = st.text_area(" ", placeholder="Escribe tu pregunta aquí...")
         
         # Process question when submitted
@@ -82,11 +82,11 @@ if pdf is not None and ke:
             st.markdown(response)
                 
     except Exception as e:
-        st.error(f"Error al procesar el PDF: {str(e)}")
+        st.error(f"Hubo un problema al procesar el PDF: {str(e)}")
         # Add detailed error for debugging
         import traceback
         st.error(traceback.format_exc())
 elif pdf is not None and not ke:
-    st.warning("Por favor ingresa tu clave de API de OpenAI para continuar")
+    st.warning("Introduce tu clave API de OpenAI para continuar, por favor.")
 else:
-    st.info("Por favor carga un archivo PDF para comenzar")
+    st.info("Sube un archivo PDF para empezar.")
